@@ -17,6 +17,9 @@ sub preprocess
     $image = $image->convert(preset => "gray")
         or die $image->errstr;
 
-    $image->write(file => "new.png", type=>"png")
+    my $filename = $_[0];
+    $filename =~ s{.*/}{};
+    $filename =~ s{\.[^.]+$}{};
+    $image->write(file => "./Preprocessed images/$filename.png", type=>"png")
 	    or die "Cannot write the image\n", $image->errstr;
 }
