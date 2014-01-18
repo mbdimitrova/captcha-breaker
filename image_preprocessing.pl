@@ -9,7 +9,7 @@ sub preprocess
 {
 #reading the image
     my $image = Imager->new;
-    $image->read(file => $_[0])
+    $image->read(file => "Example captcha images/$_[0]")
 	    or die $image->errstr;
 
 #editing the image
