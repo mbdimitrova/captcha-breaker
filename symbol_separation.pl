@@ -70,7 +70,7 @@ sub separate_symbols
                 {
                     my $copy = $image->copy();
                     my $letter = $copy->crop(left => $left, right => $right - 1);
-                    $letter->write(file => "Letters/$filename\_$letter_counter.png", type=>"png")
+                    $letter->write(file => "Preprocessed images/$filename\_$letter_counter.png", type=>"png")
                         or die "Cannot write the image\n", $letter->errstr;
                     $letter_counter += 1;
                     $left = $right;
@@ -83,11 +83,11 @@ sub separate_symbols
 
 sub calculate_threshold
 {
-    my $histogram = histogram("$_[0]");
+    my $histogram = histogram("$_[0]", 1);
     my @sorted = sort { $$histogram{$b} <=> $$histogram{$a} } keys $histogram;
     #print Dumper($histogram);
 
-    my $symbol_colour_hex = $sorted[1];
+    my $symbol_colour_hex = $sorted[0];
     my @symbol_colour_rgb = map $_ , unpack 'C*', pack 'H*', $symbol_colour_hex;
     my $threshold = 0.299 * $symbol_colour_rgb[0] + 0.587 * $symbol_colour_rgb[1] + 0.114 * $symbol_colour_rgb[2];
 
