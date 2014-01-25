@@ -11,6 +11,7 @@ use Data::Dumper;
 use Algorithm::Line::Bresenham qw/line/;
 use List::Util qw(min max);
 use Data::Types qw(:all);
+use AI::NeuralNet::Simple;
 
 struct(
     xa => '$',
@@ -109,7 +110,7 @@ sub get_magic_sticks_pattern
     my $height = $image->getheight();
 
     my $number_of_sticks = $#sticks_list + 1;
-    print "number of sticks: $number_of_sticks\n";
+    #print "number of sticks: $number_of_sticks\n";
     #print Dumper(@sticks_list);
     my @pattern; #state
 
@@ -143,7 +144,7 @@ sub get_magic_sticks_pattern
                         {
                             next;
                         }
-                        if ((pixel_stick_coverage $sticks_list[$i], $tmpx, $tmpy) == 1) #FIXME
+                        if ((pixel_stick_coverage $sticks_list[$i], $tmpx, $tmpy) == 1)
                         {
                             $pattern[$i] = 1.0;
                         }
@@ -155,12 +156,39 @@ sub get_magic_sticks_pattern
     @pattern;
 }
 
-
-
+my $sticks_number = 10;
+my $net = AI::NeuralNet::Simple->new($sticks_number, 1, 1);
 my $image = Imager->new;
-$image->read(file => "Patterns/0/0_0.png")
+$image->read(file => "Preprocessed images/test5.png")
     or die $image->errstr;
 
-our @magic_sticks_list = generate_magic_sticks_list $image->getwidth(), $image->getheight, 10;
-my @pattern = get_magic_sticks_pattern $image, @magic_sticks_list;
-print join("", @pattern);
+my @sticks_list = generate_magic_sticks_list $image->getwidth(), $image->getheight(), $sticks_number;
+
+for (my $i = 0; $i < 10; $i++)
+{
+    my $example_image = Imager->new;
+    $example_image->read(file => "Patterns/$i/$i\_0.png")
+        or die $example_image->errstr;
+    my @pattern = get_magic_sticks_pattern $example_image, @sticks_list;
+    print "$i pattern:";
+    print join("", @pattern);
+    print "----";
+
+    $net->train([@pattern] => [$i]);
+}
+
+my @image_pattern = get_magic_sticks_pattern $image, @sticks_list;
+print "image pattern:";
+print join("", @image_pattern);
+print "----";
+
+print Dumper $net->infer([@image_pattern]);
+print $net->winner([@image_pattern]);
+
+#my $image = Imager->new;
+#$image->read(file => "Patterns/0/0_0.png")
+#    or die $image->errstr;
+
+#our @magic_sticks_list = generate_magic_sticks_list $image->getwidth(), $image->getheight, 10;
+#my @pattern = get_magic_sticks_pattern $image, @magic_sticks_list;
+#print join("", @pattern);
