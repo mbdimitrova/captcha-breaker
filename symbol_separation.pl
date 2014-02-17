@@ -61,7 +61,7 @@ sub separate_symbols
 
     print "Image $filename is separated into symbols:";
 
-    my $letter_counter = 1;
+    my $letter_counter = 0;
     for (my $left = 0; $left < $#blanks; $left++)
     {
         if ($blanks[$left] == 0)
@@ -82,6 +82,7 @@ sub separate_symbols
             }
         }
     }
+    $letter_counter + 1;
 }
 
 sub calculate_threshold
@@ -94,6 +95,6 @@ sub calculate_threshold
     my @symbol_colour_rgb = map $_ , unpack 'C*', pack 'H*', $symbol_colour_hex;
     my $threshold = 0.299 * $symbol_colour_rgb[0] + 0.587 * $symbol_colour_rgb[1] + 0.114 * $symbol_colour_rgb[2];
 
-    #print $threshold;
+    #print "Threshold: $threshold";
     $threshold;
 }
