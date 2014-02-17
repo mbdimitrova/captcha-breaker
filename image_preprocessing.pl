@@ -25,4 +25,5 @@ sub preprocess
     $filename =~ s{\.[^.]+$}{};
     $image->write(file => "./Preprocessed images/$filename.png", type=>"png")
 	    or die "Cannot write the image\n", $image->errstr;
+    print "Image $filename is preprocessed."
 }

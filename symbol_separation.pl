@@ -59,6 +59,8 @@ sub separate_symbols
     }
     #print @blanks;
 
+    print "Image $filename is separated into symbols:";
+
     my $letter_counter = 1;
     for (my $left = 0; $left < $#blanks; $left++)
     {
@@ -72,6 +74,7 @@ sub separate_symbols
                     my $letter = $copy->crop(left => $left, right => $right - 1);
                     $letter->write(file => "Preprocessed images/$filename\_$letter_counter.png", type=>"png")
                         or die "Cannot write the image\n", $letter->errstr;
+                    print "\t$filename\_$letter_counter.png";
                     $letter_counter += 1;
                     $left = $right;
                     last;
