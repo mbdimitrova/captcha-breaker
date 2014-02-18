@@ -31,7 +31,6 @@ sub separate_symbols
         for my $x (0 .. $image->getwidth() - 1)
         {
             $pixels[$y][$x] = 0.299 * $red_channel[$x] + 0.587 * $green_channel[$x] + 0.114 * $blue_channel[$x];
-            #print $pixels[$y][$x];
 	    }
     }
 
@@ -57,7 +56,6 @@ sub separate_symbols
             $blanks[$x] = 0;
         }
     }
-    #print @blanks;
 
     print "Image $filename is separated into symbols:";
 
@@ -82,19 +80,18 @@ sub separate_symbols
             }
         }
     }
-    $letter_counter + 1;
+    print "\n";
+    $letter_counter;
 }
 
 sub calculate_threshold
 {
     my $histogram = histogram("$_[0]", 1);
     my @sorted = sort { $$histogram{$b} <=> $$histogram{$a} } keys $histogram;
-    #print Dumper($histogram);
 
     my $symbol_colour_hex = $sorted[0];
     my @symbol_colour_rgb = map $_ , unpack 'C*', pack 'H*', $symbol_colour_hex;
     my $threshold = 0.299 * $symbol_colour_rgb[0] + 0.587 * $symbol_colour_rgb[1] + 0.114 * $symbol_colour_rgb[2];
 
-    #print "Threshold: $threshold";
     $threshold;
 }

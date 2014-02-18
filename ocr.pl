@@ -4,28 +4,33 @@ use strict;
 
 $\ = "\n";
 
-package OCR;
 use AI::NeuralNet::Simple;
 use Imager;
 
-require "magic_match_sticks.pl";
+use lib '.';
+use MagicStick;
+#require "symbol_separation.pl";
 
 sub train
 {
     my @sticks_list = @_;
-    my $net = AI::NeuralNet::Simple->new(1, 1, 1);
+    my $sticks_number = $#sticks_list + 1;
+    my $net = AI::NeuralNet::Simple->new($sticks_number, 1, 1);
 
-    for (my $i = 0; $i < 10; $i++)
+    foreach my $i (0..9) (my $i = 0; $i < 10; $i++)
     {
-        my $example_image = Imager->new;
-        $example_image->read(file => "Patterns/$i/$i\_0.png")
-            or die $example_image->errstr;
+        my $sample_image = Imager->new;
+        $sample_image->read(file => "Patterns/$i/$i\_0.png")
+            or die $sample_image->errstr;
 
-        my @pattern = get_magic_sticks_pattern $example_image, @sticks_list;
+        my $threshold = calculate_threshold("Patterns/$i/$i\_0.png");
+        my @pattern = get_magic_sticks_pattern ($sample_image, $threshold, @sticks_list);
         print "$i pattern:";
         print join("", @pattern);
         print "----";
 
+        $net->iterations(1000);
+        $net->learn_rate(.1);
         $net->train([@pattern] => [$i]);
     }
     $net;
@@ -45,17 +50,17 @@ sub ocr
         $image->read(file => "./Preprocessed images/$filename\_$i.png")
             or die $image->errstr;
 
-        my @sticks_list = generate_magic_sticks_list $image->getwidth(), $image->getheight(), $sticks_number;
+        my @sticks_list = MagicStick::generate_magic_sticks_list ($image->getwidth(), $image->getheight(), $sticks_number);
         my $threshold = calculate_threshold("./Preprocessed images/$filename\_$i.png");
-        my @image_pattern = get_magic_sticks_pattern $image,$threshold ,@sticks_list;
+        my @image_pattern = get_magic_sticks_pattern ($image, $threshold, @sticks_list);
         print "$filename\_$i pattern:";
         print join("", @image_pattern);
         print "----";
 
         my $net = train(@sticks_list);
+        print Dumper $net ;
+        print Dumper $net->infer([@image_pattern]);
         my $winner = $net->winner([@image_pattern]);
-        print "Winner: $winner";
+        print "Winner: $winner\n";
     }
 }
-
-ocr("1.png", 10, 1);
